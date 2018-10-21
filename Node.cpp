@@ -5,10 +5,11 @@
 */
 
 #include"Node.h"
-
+#include <cstring> // Mới thêm zô
+#include <cmath> // Mới thêm zô
 Node::Node(int capacity) {
 	maxElements = capacity;
-	elements = new int[maxElements];
+	elements[maxElements];
 	numElements = 0;
 	prev = next = NULL;
 }
