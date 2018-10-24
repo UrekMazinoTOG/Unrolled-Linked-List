@@ -111,6 +111,8 @@ void UnrolledLinkedList::insertAt(int pos, int val) {
 					pNode->next->prev = newNode;
 				}
 			}
+			// End method
+			return;
 		}
 		index -= pNode->numElements; 
 	}
@@ -130,13 +132,10 @@ void UnrolledLinkedList::deleteAt(int pos)
 			pNode->removeAt(nodeSize + index);
 			--size;
 			// Shift elements
-			if(pNode->numElements < pNode->getHalfNodeSize()){
-				if(pNode->next->numElements <= pNode->getHalfNodeSize) {
-					for(int i = 0; i < pNode->next->numElements; ++i) {
-						pNode->elements[pNode->numElements] = pNode->next->elements[i];
-					}
-				}
-			}
+
+			// End method
+			return;
+			
 		}
 		index -= pNode->numElements; 
 	}
@@ -168,7 +167,6 @@ int UnrolledLinkedList::lastIndexOf(int val) {
 			// Find element of Unrolled Linked List have same value(val)
 			if(pNode->elements[i] == val) return size - index + nodeSize - 1 - i;
 			// size - 1 - (index + (nodeSize - 1 - i) + 1) 
-			// Đm làm 1 hồi chắc rớt não ra ngoài má ơi !!! Anh khổ quá em à <3
 		}
 		index += pNode->numElements;
 	}
