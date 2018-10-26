@@ -1,15 +1,16 @@
-/* Copyright (C) 2018
+/* 
+* Copyright (C) 2018
 * Course: CO2003
 * Author: Rang Nguyen
 * Ho Chi Minh City University of Technology
 */
 
 #include"Node.h"
-#include <cstring> // Mới thêm zô
-#include <cmath> // Mới thêm zô
+#include <cstring> 	// ! Fix memmove()
+#include <cmath> 	// ! Fix ceil()
 Node::Node(int capacity) {
 	maxElements = capacity;
-	elements[maxElements];
+	elements = new int[capacity]; // ! Allocated dynamic
 	numElements = 0;
 	prev = next = NULL;
 }
@@ -79,10 +80,10 @@ void Node::print() {
 }
 
 void Node::printDetail() {
-	printf("| prev(%d) |", prev);
+	printf("| prev(%p) |", prev); // ! %d -> %p
 	for (int i = 0; i < numElements; i++)
 		printf(" %d |", elements[i]);
 	for (int i = numElements; i < maxElements; i++)
 		printf(" X |");
-	printf(" next(%d) |\n", next);
+	printf(" next(%p) |\n", next);// ! $d -> %p
 }

@@ -6,7 +6,7 @@
 
 #pragma once
 #include"Node.h"
-#include <cmath> //Thêm vào để hàm ceil() không lỗi*
+#include <cmath> // ! Fix ceil
 class UnrolledLinkedList {
 private:
 	Node* head;

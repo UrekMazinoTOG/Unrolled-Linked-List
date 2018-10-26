@@ -13,7 +13,7 @@ private:
 	int maxElements;
 public:
 	int numElements; // number of elements in this node, up to maxElements
-	int* elements; // an array of numElements elements,
+	int *elements; // an array of numElements elements,
 	Node *next; // reference to the next node in the list
 	Node *prev; // reference to the previous node in the list
 
