@@ -207,7 +207,7 @@ int UnrolledLinkedList::firstIndexOf(int val) {
 		index += pNode->numElements;
 	}
 	// C2 : Not found
-	return index;
+	return -1;
 
 }
 
@@ -225,7 +225,7 @@ int UnrolledLinkedList::lastIndexOf(int val) {
 		index += pNode->numElements;
 	}
 	// C2 : Not found
-	return index;
+	return -1;
 }
 
 bool UnrolledLinkedList::contains(int val) {
@@ -248,6 +248,9 @@ void swap(Node* &a, Node* &b) {
 }
 
 void UnrolledLinkedList::reverse() {
+	// ? List is empty
+	if(head == NULL) return;
+	// ! 
 	swap(head, tail);
 	// 1./ Travels from the old head to the old tail of Unrolled Linked List
 	for(Node *pNode = tail; pNode != NULL; pNode = pNode->prev) {
