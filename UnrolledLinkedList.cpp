@@ -103,7 +103,7 @@ void UnrolledLinkedList::insertAt(int pos, int val) {
 				if(index < pNode->getHalfNodeSize()) {
 					// 1./ Move final half of current node into new node
 					for(int i = 0; i < pNode->getHalfNodeSize(); ++i) 
-						newNode->add(pNode->elements[pNode->getHalfNodeSize() + i - 1]);
+						newNode->add(pNode->elements[pNode->numElements/2 + i]);
 					pNode->numElements = pNode->numElements/2;
 					// 2./ Add val into current node
 					pNode->insertAt(index, val);
@@ -247,7 +247,7 @@ bool UnrolledLinkedList::contains(int val) {
 	// 1./ Travels from the head to the tail of Unrolled Linked List
 	for(Node *pNode = head; pNode != NULL; pNode = pNode->next) {
 		// 1./ Travels from the head to the tail of Array
-		for(int i = 0; i < numOfNodes; i++) {
+		for(int i = 0; i < pNode->numElements; i++) {
 			if(pNode->elements[i] == val) return true;
 		}
 	}
@@ -275,7 +275,7 @@ void UnrolledLinkedList::reverse() {
 
 int* UnrolledLinkedList::toArray() {
 	// C1 : Unrolled linked list is empty
-	return NULL;
+	if(head == NULL) return NULL;
 	// C2 : Unrolled linked list is NOT empty
 	int *arr = new int[size];
 	int index = 0;
