@@ -98,14 +98,28 @@ void UnrolledLinkedList::insertAt(int pos, int val) {
 				// 1./ Create a new node
 				Node *newNode = new Node(nodeSize);
 				++numOfNodes;
-				// 2./ Move final half of current node into new node
-				for(int i = 0; i < nodeSize/2; ++i) 
-					newNode->elements[i] = pNode->elements[pNode->getHalfNodeSize() + i];
-				pNode->numElements = pNode->getHalfNodeSize();
-				// 3./ Add val into new node
-				newNode->add(val);
-				++size;
-				// 4./ Adjust tail of Urolled Linked List
+				// 2./ Insert new value
+				int index = pNode->numElements + pos;
+				if(index < pNode->getHalfNodeSize()) {
+					// 1./ Move final half of current node into new node
+					for(int i = 0; i < pNode->getHalfNodeSize(); ++i) 
+						newNode->add(pNode->elements[pNode->getHalfNodeSize() + i - 1]);
+					pNode->numElements = pNode->numElements/2;
+					// 2./ Add val into current node
+					pNode->insertAt(index, val);
+					++size;
+				}
+				else {
+					// 1./ Move final half of current node into new node
+					for(int i = 0; i < nodeSize/2; ++i) 
+						newNode->add(pNode->elements[pNode->getHalfNodeSize() + i]);
+					pNode->numElements = pNode->getHalfNodeSize();
+					// 2./ Add val into new node
+					newNode->insertAt(index - pNode->getHalfNodeSize() ,val);
+					++size;
+				}
+				
+				// 3./ Adjust tail of Urolled Linked List
 				// - C2_1 : + Current node is tail node
 				//          + Unrolled Linked List has one node
 				if(pNode->next == NULL) {
@@ -248,9 +262,7 @@ void swap(Node* &a, Node* &b) {
 }
 
 void UnrolledLinkedList::reverse() {
-	// ? List is empty
 	if(head == NULL) return;
-	// ! 
 	swap(head, tail);
 	// 1./ Travels from the old head to the old tail of Unrolled Linked List
 	for(Node *pNode = tail; pNode != NULL; pNode = pNode->prev) {
