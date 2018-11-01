@@ -1,15 +1,13 @@
 #include"UnrolledLinkedList.h"
-
-using namespace std;
 void UnrolledLinkedList::add(int val) {
 	// - C1-- : Urolled Linked List is empty
-	if(tail == NULL) { // if(head == NULL)
+	if(head == NULL) { // if(tail == NULL)
 		// 1./ Create new new node
 		head = tail = new Node(nodeSize);
-		numOfNodes = 1;
+		++numOfNodes;
 		// 2./ Insert the first element into the first node
-		tail->add(val);
-		size = 1;
+		head->add(val);
+		++size;
 		// 5./ End C1
 		return;
 	}
@@ -27,14 +25,18 @@ void UnrolledLinkedList::add(int val) {
 		newNode->add(val);
 		++size;
 		// 4./ Adjust tail of Urolled Linked List 
-		newNode->prev = tail;
 		tail->next = newNode;
+		newNode->prev = tail;
 		tail = newNode;
 		// 5./ End C2_1
 		return;
 	}
 	// + C2_2 : Unrolled Linked List is not full and not empty
 	else { 
+		// ? Thêm trường hợp
+		// ? Nếu Tail->prev khác NULL
+		// ? Có nên dời phần tử qua không
+		// ? Tiết kiệm bộ nhớ hay tốc độ ?
 		// 1./ Add val into tail node
 		tail->add(val); 
 		++size;
@@ -75,6 +77,7 @@ void UnrolledLinkedList::setAt(int pos, int val) {
 
 }
 
+
 void UnrolledLinkedList::insertAt(int pos, int val) {
 	if (pos < 0 || pos > size)
 		throw "IndexOutOfBoundsException"; // check whether pos is valid or not
@@ -86,56 +89,51 @@ void UnrolledLinkedList::insertAt(int pos, int val) {
 		pos -= pNode->numElements;
 		// 1./ Find element of Unrolled Linked List at position(pos)
 		if(pos < 0) {
+            int index = pNode->numElements + pos;
 			// C1__ : Node is not full
 			if(!pNode->isFull()) {
 				// 1./ Add val into current node
-				pNode->insertAt(pNode->numElements + pos, val);
+				pNode->insertAt(index, val);
 				++size;
 				// 2./ End C1
 				return;
 			} else {
+                ++size;
 			// C2__ : Node is full
-				// 1./ Create a new node
-				Node *newNode = new Node(nodeSize);
-				++numOfNodes;
-				// 2./ Insert new value
-				int index = pNode->numElements + pos;
-				if(index < pNode->getHalfNodeSize()) {
-					// 1./ Move final half of current node into new node
-					for(int i = 0; i < pNode->getHalfNodeSize(); ++i) 
-						newNode->add(pNode->elements[pNode->numElements/2 + i]);
-					pNode->numElements = pNode->numElements/2;
-					// 2./ Add val into current node
-					pNode->insertAt(index, val);
-					++size;
-				}
-				else {
-					// 1./ Move final half of current node into new node
-					for(int i = 0; i < nodeSize/2; ++i) 
-						newNode->add(pNode->elements[pNode->getHalfNodeSize() + i]);
-					pNode->numElements = pNode->getHalfNodeSize();
-					// 2./ Add val into new node
-					newNode->insertAt(index - pNode->getHalfNodeSize() ,val);
-					++size;
-				}
-				
-				// 3./ Adjust tail of Urolled Linked List
-				// - C2_1 : + Current node is tail node
-				//          + Unrolled Linked List has one node
-				if(pNode->next == NULL) {
-					newNode->prev = tail;
-					tail->next = newNode;
-					tail = newNode;
-				}
-				// - C2_2 : Current node is not tail node
-				else {
-					newNode->next = pNode->next;
-					newNode->prev = pNode;
-					pNode->next = newNode;
-					pNode->next->prev = newNode;
-				}
-				// 2./ End C2
-				return;
+				if(pNode->prev != NULL && !pNode->prev->isFull()) {
+                    if(index == 0) {
+                        pNode->prev->add(val);
+                        return;
+                    }
+                    else {
+                        int temp = pNode->elements[0];
+                        pNode->prev->add(temp);
+                        pNode->removeAt(0);
+                        pNode->insertAt(index - 1, val);
+                        return;
+                    }
+                }
+
+                int temp = pNode->elements[pNode->numElements - 1];
+                pNode->removeAt(pNode->numElements - 1);
+                pNode->insertAt(index, val);
+
+                Node* newNode = new Node(nodeSize);
+                ++numOfNodes;
+                for (int k = pNode->getHalfNodeSize(); k < pNode->numElements; k++) {
+                    newNode->add(pNode->elements[k]);
+                }
+                newNode->add(temp);
+                for (int k = pNode->numElements - 1; k >= pNode->getHalfNodeSize(); k--) {
+                    pNode->removeAt(k);
+                }
+                newNode->next = pNode->next;
+                pNode->next = newNode;
+                newNode->prev = pNode;
+                if(newNode->next != NULL)
+                    newNode->next->prev = newNode;
+                if(pNode == tail) tail = newNode;
+                return;
 			}
 		}
 	}
@@ -209,36 +207,23 @@ void UnrolledLinkedList::deleteAt(int pos)
 }
 
 int UnrolledLinkedList::firstIndexOf(int val) {
-	int index = -1;
-	// C1 : Found
-	// 1./ Travels from the head to the tail of Unrolled Linked List
-	for(Node *pNode = head; pNode != NULL; pNode = pNode->next) {
-		// 1./ Travels from the head to the tail of Array
-		for(int i = 0; i < numOfNodes; i++) {
-			// 1./ Find element of Unrolled Linked List have same value(val)
-			if(pNode->elements[i] == val) return index + i + 1;
+	int index = 0;
+	for (Node*p = head; p != NULL; p = p->next)
+		for (int i = 0; i < p->numElements; i++) {
+			if (p->elements[i] == val) return index;
+			index++;
 		}
-		index += pNode->numElements;
-	}
-	// C2 : Not found
 	return -1;
-
 }
 
 int UnrolledLinkedList::lastIndexOf(int val) {
-	int index = -1;
-	// C1 : Found
-	// Travels from the tail to the head of Unrolled Linked List
-	for(Node *pNode = tail; pNode != NULL; pNode = pNode->prev) {
-		// Travels from the tail to the head of Array
-		for(int i = pNode->numElements - 1; i >= 0; --i) {
-			// Find element of Unrolled Linked List have same value(val)
-			if(pNode->elements[i] == val) return size - index - pNode->numElements + i - 1;
-			// size - 1 - (index + (pNode->numOfElemnt - 1 - i) + 1) 
+	int index = size-1;
+	for (Node*p = tail; p != NULL; p = p->prev) 
+		for (int i = p->numElements - 1; i >= 0; i--) {
+			if (p->elements[i] == val)
+				return index;
+			index--;
 		}
-		index += pNode->numElements;
-	}
-	// C2 : Not found
 	return -1;
 }
 
@@ -254,6 +239,7 @@ bool UnrolledLinkedList::contains(int val) {
 	// C2 : Not found
 	return false;
 }
+
 // Swap 2 Node in Tree
 void swap(Node* &a, Node* &b) {
 	Node* tmp = a;
@@ -288,3 +274,4 @@ int* UnrolledLinkedList::toArray() {
 	}
 	return arr;
 }
+
