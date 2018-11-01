@@ -1,4 +1,4 @@
-#include"UnrolledLinkedList.h"
+﻿#include"UnrolledLinkedList.h"
 void UnrolledLinkedList::add(int val) {
 	// - C1-- : Urolled Linked List is empty
 	if(head == NULL) { // if(tail == NULL)
@@ -141,67 +141,167 @@ void UnrolledLinkedList::insertAt(int pos, int val) {
 
 void UnrolledLinkedList::deleteAt(int pos)
 {
-	if (pos < 0 || pos >= size) 
-		throw "IndexOutOfBoundsException";// check whether pos is valid or not
-
-	// 1./ Travels from the head to the tail of Unrolled Linked List
-	for(Node *pNode = head; pNode != NULL; pNode = pNode->next) {
-		pos -= pNode->numElements; 
-		// 1./ Find element of Unrolled Linked List at position(pos)
-		if(pos < 0) {
-			// 1./ Delete element
-			pNode->removeAt(pNode->numElements + pos);
-			--size;
-			// 2./ Shift elements
-			// - C1__ : Number of Elements in Node great than or equal half node size
-			if(pNode->numElements >= pNode->getHalfNodeSize()) return; // Don't do anything
-			// - C2__ : Number of Elements in Node less than half node size
-			// - C2_1 : Node left != NULL
-			if(pNode->next != NULL) {
-				// 1./ Move first element of next node into current node
-				while(pNode->numElements < pNode->getHalfNodeSize()) {
-					pNode->add(pNode->next->elements[0]);
-					pNode->next->removeAt(0);
-				}
-				// 2./ Merge node 
-				if(pNode->next->numElements < pNode->getHalfNodeSize()) {
-					while(!pNode->next->isEmpty()){
-						pNode->add(pNode->next->elements[0]);
-						pNode->next->removeAt(0);
-					}
-					Node *dltNode = pNode->next;
-					pNode->next = dltNode->next;
-					if(dltNode->next != NULL) dltNode->next->prev = pNode;
-					--numOfNodes;
-				}
-				// 3./ End C2_1
-				return;
-			}
-			// - C2_2 : Node left == NULL, Node right != NULL
-			else if(pNode->prev != NULL) {
-				// 1./ Move last element of previous node into current node
-				while(pNode->numElements < pNode->getHalfNodeSize()) {
-					pNode->insertAt(0, pNode->prev->elements[pNode->numElements - 1]);
-					--pNode->prev->numElements;
-				}
-				// 2./ Merge node
-				if(pNode->prev->numElements < pNode->getHalfNodeSize()) {
-					while(!pNode->prev->isEmpty()){
-						pNode->insertAt(0, pNode->prev->elements[pNode->numElements - 1]);
-						--pNode->prev->numElements;
-					}
-					Node *dltNode = pNode->prev;
-					pNode->prev = dltNode->prev;
-					if(dltNode->prev != NULL) dltNode->prev->next = pNode;
-					--numOfNodes;
-				}
-				// 3./ End C2_2
-				return;
-			}
-			// - C2_3 : Node left == NULL, Node right == NULL
-			// Don't do anything
-			// End C2
+	if (pos < 0 || pos >= size)
+		throw "IndexOutOfBoundsException"; // check whether pos is valid or not
+	size--;
+	if (numOfNodes == 1)
+	{
+		if (size == 1) {
+			head->removeAt(0);
+			Node*temp = head;
+			delete temp;
+			head = tail = NULL;
+			numOfNodes--;
 			return;
+		}
+		else {
+			head->removeAt(pos);
+			return;
+		}
+	}
+	int count = 0;
+	for (Node*p = head; p != NULL; p = p->next) {
+		for (int i = 0; i < p->numElements; i++) {
+			if (count == pos) {
+				if (p->numElements > p->getHalfNodeSize()) {
+					p->removeAt(i);
+					return;
+				}
+				else {
+					if (p == head) {
+						if (p->next->numElements > p->next->getHalfNodeSize()) {
+							p->removeAt(i);
+							p->add(p->next->elements[0]);
+							p->next->removeAt(0);
+							return;
+						}
+						else {
+							p->removeAt(i);
+							for (int k = 0; k < p->next->getHalfNodeSize(); k++)
+								p->add(p->next->elements[k]);
+							// delete node p->next after Merger
+							for (int k = p->next->getHalfNodeSize() - 1; k >= 0; k--)
+								p->next->removeAt(k);
+							Node* temp = p->next;
+							// Change next only if node to be deleted is NOT the last node 
+							if (temp->next != NULL) {
+								temp->next->prev = temp->prev;
+							}
+							else {
+								tail = temp->prev;
+							}
+
+							// Change prev only if node to be deleted is NOT the first node
+							if (temp->prev != NULL) {
+								temp->prev->next = temp->next;
+							}
+							delete temp;
+							numOfNodes--;
+							return;
+						}
+					}
+					else if (p == tail) {
+						if (p->prev->numElements > p->prev->getHalfNodeSize()) {
+							p->removeAt(i);
+							// l?y ph?n t? cu?i c?a p->prev luu vào x
+							int x = p->prev->elements[p->prev->numElements - 1];
+							p->insertAt(0, x);
+							p->prev->removeAt(p->prev->numElements - 1);
+							return;
+						}
+						else {
+							p->removeAt(i);
+							for (int k = 0; k < p->numElements; k++) {
+								p->prev->add(p->elements[k]);
+							}
+
+							// delete node p after Merger
+							for (int k = p->numElements - 1; k >= 0; k--) {
+								p->removeAt(k);
+							}
+
+							Node* temp = p;
+							// Change next only if node to be deleted is NOT the last node
+							if (temp->next != NULL) {
+								temp->next->prev = temp->prev;
+							}
+							else {
+								tail = temp->prev;
+							}
+
+							// Change prev only if node to be deleted is NOT the first node
+							if (temp->prev != NULL) {
+								temp->prev->next = temp->next;
+							}
+							delete temp;
+							numOfNodes--;
+							return;
+						}
+					}
+					else {
+						if (p->next->numElements > p->next->getHalfNodeSize()) {
+							p->removeAt(i);
+							if (p->prev->numElements == p->prev->getHalfNodeSize()) { /*   */
+								for (int k = 0; k < p->numElements; k++)
+									p->prev->add(p->elements[k]);
+								for (int k = p->numElements - 1; k >= 0; k--)
+									p->removeAt(k);
+								Node* temp = p;
+
+								/* Change next only if node to be deleted is NOT the last node */
+								if (temp->next != NULL) {
+									temp->next->prev = temp->prev;
+								}
+								else {
+									tail = temp->prev;
+								}
+
+								/* Change prev only if node to be deleted is NOT the first node */
+								if (temp->prev != NULL) {
+									temp->prev->next = temp->next;
+								}
+								//temp->prev->next = temp->next;
+								//temp->next->prev = temp->prev;
+								delete temp;
+								numOfNodes--;
+								return;
+							}
+							else {
+								p->add(p->next->elements[0]);
+								p->next->removeAt(0);
+								return;
+							}
+						}
+						else {
+							p->removeAt(i);
+							for (int k = 0; k < p->next->getHalfNodeSize(); k++) {
+								p->add(p->next->elements[k]);
+							}
+							// delete node p->next after Merger
+							for (int k = p->next->getHalfNodeSize() - 1; k >= 0; k--) {
+								p->next->removeAt(k);
+							}
+							Node* temp = p->next;
+							/* Change next only if node to be deleted is NOT the last node */
+							if (temp->next != NULL) {
+								temp->next->prev = temp->prev;
+							}
+							else {
+								tail = temp->prev;
+							}
+
+							/* Change prev only if node to be deleted is NOT the first node */
+							if (temp->prev != NULL) {
+								temp->prev->next = temp->next;
+							}
+							delete temp;
+							numOfNodes--;
+							return;
+						}
+					}
+				}
+			}
+			count++;
 		}
 	}
 }
